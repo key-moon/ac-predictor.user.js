@@ -1,21 +1,12 @@
 import * as $ from "jquery";
-import dom from "./dom.html";
 import moment from "moment";
-import { SideMenuElement } from "atcoder-sidemenu";
 import { PredictorDB } from "../../libs/database/predictorDB";
 import { Contest } from "../../libs/contest/contest";
 import { OnDemandResults } from "../../libs/contest/results/standingsResults";
 import { FixedResults } from "../../libs/contest/results/fIxedResults";
 import { Result } from "../../libs/contest/results/result";
-import { PredictorModel } from "./model/PredictorModel";
-import { CalcFromRankModel } from "./model/calcFromRankModel";
-import { CalcFromPerfModel } from "./model/calcFromPerfModel";
-import { CalcFromRateModel } from "./model/calcFromRateModel";
-import { roundValue } from "../../libs/utils/roundValue";
 import {
     getAPerfsData,
-    getMyHistoryData,
-    getPerformanceHistories,
     getResultsData,
     getStandingsData
 } from "atcoder-userscript-libs/src/libs/data";
@@ -23,29 +14,12 @@ import {
     contestScreenName,
     startTime,
     getLS,
-    setLS,
-    userScreenName
+    setLS
 } from "atcoder-userscript-libs/src/libs/global";
 import { fetchContestInformation } from "atcoder-userscript-libs/src/libs/contestInformation";
 import { getColor } from "atcoder-userscript-libs/src/libs/rating";
 
-export let predictor = new SideMenuElement(
-    "predictor",
-    "Predictor",
-    /atcoder.jp\/contests\/.+/,
-    dom,
-    afterAppend
-);
-
 const firstContestDate = moment("2016-07-16 21:00");
-const predictorElements = [
-    "predictor-input-rank",
-    "predictor-input-perf",
-    "predictor-input-rate",
-    "predictor-current",
-    "predictor-reload",
-    "predictor-tweet"
-];
 const aPerfUpdatedTimeKey = "predictor-aperf-last-updated";
 const updateDuration = 10 * 60 * 1000;
 
@@ -60,77 +34,14 @@ async function afterAppend() {
     /** @type Contest */
     let contest;
 
-    /** @type PredictorModel */
-    let model = new PredictorModel({
-        rankValue: 0,
-        perfValue: 0,
-        rateValue: 0,
-        enabled: false,
-        history: getPerformanceHistories(await getMyHistoryData())
-    });
-
-    $('[data-toggle="tooltip"]').tooltip();
-
     if (!shouldEnabledPredictor().verdict) {
-        model.updateInformation(shouldEnabledPredictor().message);
-        updateView();
         return;
     }
 
     try {
         await initPredictor();
     } catch (e) {
-        model.updateInformation(e.message);
-        model.setEnable(false);
-        updateView();
-    }
-
-    subscribeEvents();
-
-    function subscribeEvents() {
-        $("#predictor-reload").click(async () => {
-            model.updateInformation("読み込み中…");
-            $("#predictor-reload").button("loading");
-            updateView();
-            await updateStandingsFromAPI();
-            $("#predictor-reload").button("reset");
-            updateView();
-        });
-        $("#predictor-current").click(function() {
-            const myResult = contest.templateResults[userScreenName];
-            if (!myResult) return;
-            model = new CalcFromRankModel(model);
-            model.updateData(
-                myResult.RatedRank,
-                model.perfValue,
-                model.rateValue
-            );
-            updateView();
-        });
-        $("#predictor-input-rank").keyup(function() {
-            const inputString = $("#predictor-input-rank").val();
-            if (!isFinite(inputString)) return;
-            const inputNumber = parseInt(inputString);
-            model = new CalcFromRankModel(model);
-            model.updateData(inputNumber, 0, 0);
-            updateView();
-        });
-        $("#predictor-input-perf").keyup(function() {
-            const inputString = $("#predictor-input-perf").val();
-            if (!isFinite(inputString)) return;
-            const inputNumber = parseInt(inputString);
-            model = new CalcFromPerfModel(model);
-            model.updateData(0, inputNumber, 0);
-            updateView();
-        });
-        $("#predictor-input-rate").keyup(function() {
-            const inputString = $("#predictor-input-rate").val();
-            if (!isFinite(inputString)) return;
-            const inputNumber = parseInt(inputString);
-            model = new CalcFromRateModel(model);
-            model.updateData(0, 0, inputNumber);
-            updateView();
-        });
+        console.error(e.message);
     }
 
     async function initPredictor() {
@@ -163,8 +74,6 @@ async function afterAppend() {
         }
 
         await updateData(aPerfs, standings);
-        model.setEnable(true);
-        model.updateInformation(`最終更新 : ${moment().format("HH:mm:ss")}`);
 
         if (isStandingsPage) {
             $("thead > tr").append(
@@ -186,22 +95,16 @@ async function afterAppend() {
                 attributeFilter: ["class"]
             });
         }
-        updateView();
+        addPerfToStandings();
     }
 
     async function updateStandingsFromAPI() {
         try {
             const shouldEnabled = shouldEnabledPredictor();
-            if (!shouldEnabled.verdict) throw new Error(shouldEnabled.message);
+            if (!shouldEnabled.verdict) return;
             const standings = await getStandingsData(contestScreenName);
             await updateData(contest.aPerfs, standings);
-            model.updateInformation(
-                `最終更新 : ${moment().format("HH:mm:ss")}`
-            );
-            model.setEnable(true);
         } catch (e) {
-            model.updateInformation(e.message);
-            model.setEnable(false);
         }
     }
 
@@ -215,46 +118,7 @@ async function afterAppend() {
             standings,
             aperfs
         );
-        model.contest = contest;
         await updateResultsData();
-    }
-
-    function updateView() {
-        const roundedRankValue = isFinite(model.rankValue)
-            ? roundValue(model.rankValue, 2)
-            : "";
-        const roundedPerfValue = isFinite(model.perfValue)
-            ? roundValue(model.perfValue, 2)
-            : "";
-        const roundedRateValue = isFinite(model.rateValue)
-            ? roundValue(model.rateValue, 2)
-            : "";
-        $("#predictor-input-rank").val(roundedRankValue);
-        $("#predictor-input-perf").val(roundedPerfValue);
-        $("#predictor-input-rate").val(roundedRateValue);
-
-        $("#predictor-alert").html(
-            `<h5 class='sidemenu-txt'>${model.information}</h5>`
-        );
-
-        if (model.enabled) enabled();
-        else disabled();
-
-        if (isStandingsPage) {
-            addPerfToStandings();
-        }
-        function enabled() {
-            $("#predictor-reload").button("reset");
-            predictorElements.forEach(element => {
-                $(`#${element}`).removeAttr("disabled");
-            });
-        }
-        function disabled() {
-            $("#predictor-reload").button("reset");
-            predictorElements.forEach(element => {
-                $(`#${element}`).attr("disabled", true);
-            });
-        }
     }
 
     function shouldEnabledPredictor() {
