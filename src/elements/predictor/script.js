@@ -23,7 +23,7 @@ const firstContestDate = moment("2016-07-16 21:00");
 const aPerfUpdatedTimeKey = "predictor-aperf-last-updated";
 const updateDuration = 10 * 60 * 1000;
 
-async function afterAppend() {
+export async function afterAppend() {
     const isStandingsPage = /standings([^/]*)?$/.test(document.location.href);
     const predictorDB = new PredictorDB();
     const contestInformation = await fetchContestInformation(contestScreenName);

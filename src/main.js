@@ -8,13 +8,10 @@
 // @require     https://greasyfork.org/scripts/386715-atcoder-sidemenu/code/atcoder-sidemenu.js
 // @require     https://greasyfork.org/scripts/386712-atcoder-userscript-libs/code/atcoder-userscript-libs.js
 // @supportURL  https://github.com/key-moon/ac-predictor.user.js/issues
-// @match       https://atcoder.jp/*
-// @exclude     https://atcoder.jp/*/json
+// @match       https://atcoder.jp/*/standings
+// @exclude     https://atcoder.jp/*/standings/json
 // ==/UserScript==
 
-import { sidemenu } from "atcoder-sidemenu";
-import { predictor } from "./elements/predictor/script";
-import { estimator } from "./elements/estimator/script";
+import { afterAppend } from "./elements/predictor/script";
 
-sidemenu.addElement(predictor);
-sidemenu.addElement(estimator);
+afterAppend();
