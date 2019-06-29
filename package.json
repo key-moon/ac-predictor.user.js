@@ -1,10 +1,9 @@
 {
-  "name": "ac-predictor",
+  "name": "ac-predictor-minimal",
   "version": "1.2.5",
-  "description": "パフォーマンス予測機能を主とした、AtCoder関連のツールを提供します。",
+  "description": "AtCoderのパフォーマンスを予測し、順位表に表示します。",
   "main": "ac-predictor/main.js",
   "dependencies": {
-    "atcoder-sidemenu": "^0.1.3",
     "atcoder-userscript-libs": "^0.1.3",
     "jquery": "^3.4.1",
     "moment": "^2.24.0"
