@@ -324,7 +324,8 @@ async function afterAppend() {
                         result && result.IsRated
                             ? (lastPerformance = result.Performance)
                             : lastPerformance,
-                        result ? result.InnerPerformance : 0
+                        result ? result.InnerPerformance : 0,
+                        data.TotalResult.Score
                     );
                 })
             );

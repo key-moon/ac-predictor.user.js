@@ -10,6 +10,7 @@ export class Result {
      * @param {number} innerPerformance
      * @param {number} oldRating
      * @param {number} newRating
+     * @param {number} totalScore
      */
     constructor(
         isRated,
@@ -21,7 +22,8 @@ export class Result {
         newRating,
         competitions,
         performance,
-        innerPerformance
+        innerPerformance,
+        totalScore
     ) {
         this.IsRated = isRated;
         this.IsSubmitted = isSubmitted;
@@ -33,5 +35,6 @@ export class Result {
         this.Competitions = competitions;
         this.Performance = performance;
         this.InnerPerformance = innerPerformance;
+        this.TotalScore = totalScore;
     }
 }

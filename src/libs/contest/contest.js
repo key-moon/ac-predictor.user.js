@@ -75,7 +75,8 @@ export class Contest {
                             null,
                             data.Competitions,
                             null,
-                            null
+                            null,
+                            data.TotalResult.Score
                         );
                     });
                     currentRatedRank += ratedInTiedUsers;
