@@ -168,7 +168,7 @@ async function afterAppend() {
             const tasks = await getContestTaskData(contestScreenName);
             model.tasks = tasks;
             for (const task of tasks) {
-                $("#predictor-nextac-select").append(`<option>${task.assignment}問題</option>`)
+                $("#predictor-nextac-select").append(`<option value="${task.assignment}">${task.assignment}問題</option>`)
             }
         } catch (e) {
             throw new Error("配点の取得に失敗しました。");
