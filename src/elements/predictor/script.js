@@ -356,7 +356,9 @@ async function afterAppend() {
                             ? (lastPerformance = result.Performance)
                             : lastPerformance,
                         result ? result.InnerPerformance : 0,
-                        data.TotalResult.Score
+                        data.TotalResult.Score,
+                        data.TotalResult.Elapsed,
+                        data.TotalResult.Penalty
                     );
                 })
             );
