@@ -43,6 +43,8 @@ const predictorElements = [
     "predictor-input-perf",
     "predictor-input-rate",
     "predictor-current",
+    "predictor-nextac-select",
+    "predictor-nextac-button",
     "predictor-reload",
     "predictor-tweet"
 ];
@@ -160,6 +162,32 @@ async function afterAppend() {
         }
         async function getAPerfsFromLocalData() {
             return await predictorDB.getData("APerfs", contestScreenName);
+        }
+
+        try {
+            const tasks = await getContestTaskData(contestScreenName);
+            model.tasks = tasks;
+        } catch (e) {
+            throw new Error("配点の取得に失敗しました。");
+        }
+
+        async function getContestTaskData(contestScreenName) {
+            const tasks = standings.TaskInfo;
+            let points = [];
+            for (const task of tasks) {
+                points.push([
+                    task.Assignment,
+                    (await getTaskPoint(task.TaskScreenName))
+                ]);
+            }
+            return points;
+
+            async function getTaskPoint(taskScreenName) {
+                const taskPageDom = await $.ajax(`https://atcoder.jp/contests/${contestScreenName}/tasks/${taskScreenName}`).then(x => new DOMParser().parseFromString(x, "text/html"));
+                const point = parseInt($(taskPageDom).find("#task-statement").find("var").eq(0).text());
+                if (!isNaN(point)) return point;
+                else throw new Error();
+            }
         }
 
         await updateData(aPerfs, standings);
