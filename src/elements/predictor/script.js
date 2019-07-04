@@ -168,7 +168,7 @@ async function afterAppend() {
             const tasks = await getContestTaskData(contestScreenName);
             model.tasks = tasks;
             for (const task of tasks) {
-                $("#predictor-nextac-select").append(`<option>${task[0]}問題</option>`)
+                $("#predictor-nextac-select").append(`<option>${task.assignment}問題</option>`)
             }
         } catch (e) {
             throw new Error("配点の取得に失敗しました。");
@@ -178,10 +178,10 @@ async function afterAppend() {
             const tasks = standings.TaskInfo;
             let points = [];
             for (const task of tasks) {
-                points.push([
-                    task.Assignment,
-                    (await getTaskPoint(task.TaskScreenName))
-                ]);
+                points.push({
+                    assignment: task.Assignment,
+                    point: (await getTaskPoint(task.TaskScreenName))
+                });
             }
             return points;
 
