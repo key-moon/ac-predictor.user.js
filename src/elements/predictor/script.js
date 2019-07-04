@@ -188,7 +188,7 @@ async function afterAppend() {
             async function getTaskPoint(taskScreenName) {
                 const taskPageDom = await $.ajax(`https://atcoder.jp/contests/${contestScreenName}/tasks/${taskScreenName}`).then(x => new DOMParser().parseFromString(x, "text/html"));
                 const point = parseInt($(taskPageDom).find("#task-statement").find("var").eq(0).text());
-                if (!isNaN(point)) return point;
+                if (!isNaN(point)) return point * 100;
                 else throw new Error();
             }
         }
