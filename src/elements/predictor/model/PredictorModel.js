@@ -39,7 +39,7 @@ export class PredictorModel {
     }
 
     /**
-     * @param {Task} tasks
+     * @param {Task[]} tasks
      */
     updateTasks(tasks) {
         this.tasks = tasks;
