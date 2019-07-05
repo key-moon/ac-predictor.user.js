@@ -134,8 +134,8 @@ async function afterAppend() {
             const myTotalScore = contest.templateResults[userScreenName].TotalScore;
             const myPenalty = contest.templateResults[userScreenName].Penalty;
             // This is bugged, waiting for the update of "atcoder-userscript-libs".
-            // const contestPenalty = contestInformation.Penalty;
-            const contestPenalty = await fetchContestPenalty(contestScreenName);
+            // const contestPenalty = contestInformation.Penalty * 1000000;
+            const contestPenalty = await fetchContestPenalty(contestScreenName) * 1000000;
             const nextElapsed = moment().diff(moment(startTime)) * 1000000;
             const nextRank = getInsertedRatedRank(myTotalScore + nextPoint, nextElapsed + contestPenalty * myPenalty);
             model = new CalcFromRankModel(model);
