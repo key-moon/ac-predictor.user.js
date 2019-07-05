@@ -120,7 +120,7 @@ async function afterAppend() {
             const myTaskResults = myData.TaskResults;
             const myACTaskScreenNames = Object.keys(myTaskResults).filter(taskScreenName => myTaskResults[taskScreenName].Status === 1);
             const myACTaskAssignments = myACTaskScreenNames.map(taskScreenName => {
-                return model.tasks.filter(task => task.taskScreenName === taskScreenName)[0].assignment;
+                return model.tasks.find(task => task.taskScreenName === taskScreenName).assignment;
             });
 
             const nextTaskAssignment = $("#predictor-nextac-select option:selected").val();
