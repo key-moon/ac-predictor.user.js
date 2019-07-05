@@ -1,3 +1,5 @@
+import { Task } from "../../../libs/contest/task";
+
 export class PredictorModel {
     /**
      * @param {PredictorModel} [model]
@@ -36,6 +38,9 @@ export class PredictorModel {
         this.rateValue = rateValue;
     }
 
+    /**
+     * @param {Task} tasks
+     */
     updateTasks(tasks) {
         this.tasks = tasks;
     }

@@ -4,6 +4,7 @@ import moment from "moment";
 import { SideMenuElement } from "atcoder-sidemenu";
 import { PredictorDB } from "../../libs/database/predictorDB";
 import { Contest } from "../../libs/contest/contest";
+import { Task } from "../../libs/contest/task";
 import { OnDemandResults } from "../../libs/contest/results/standingsResults";
 import { FixedResults } from "../../libs/contest/results/fIxedResults";
 import { Result } from "../../libs/contest/results/result";
@@ -218,7 +219,7 @@ async function afterAppend() {
         }
 
         try {
-            const tasks = await getContestTaskData(contestScreenName);
+            const tasks = await getContestTasks(contestScreenName);
             model.updateTasks(tasks);
             for (const task of tasks) {
                 $("#predictor-nextac-select").append(`<option value="${task.assignment}">${task.assignment}問題</option>`)
@@ -227,16 +228,17 @@ async function afterAppend() {
             throw new Error("配点の取得に失敗しました。");
         }
 
-        async function getContestTaskData(contestScreenName) {
-            const tasks = standings.TaskInfo;
-            let points = [];
-            for (const task of tasks) {
-                points.push({
-                    assignment: task.Assignment,
-                    point: (await getTaskPoint(task.TaskScreenName))
-                });
+        async function getContestTasks(contestScreenName) {
+            const standingsTaskInfo = standings.TaskInfo;
+            let tasks = [];
+            for (const taskData of standingsTaskInfo) {
+                tasks.push(new Task(
+                    taskData.Assignment,
+                    (await getTaskPoint(taskData.TaskScreenName)),
+                    taskData.TaskScreenName
+                ))
             }
-            return points;
+            return tasks;
 
             async function getTaskPoint(taskScreenName) {
                 const taskPageDom = await $.ajax(`https://atcoder.jp/contests/${contestScreenName}/tasks/${taskScreenName}`).then(x => new DOMParser().parseFromString(x, "text/html"));
