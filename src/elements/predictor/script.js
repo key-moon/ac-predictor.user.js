@@ -46,6 +46,7 @@ const predictorElements = [
     "predictor-current",
     "predictor-nextac-select",
     "predictor-nextac-button",
+    "predictor-nextac-warning",
     "predictor-reload",
     "predictor-tweet"
 ];
@@ -111,8 +112,22 @@ async function afterAppend() {
             updateView();
         });
         $("#predictor-nextac-button").click(async function() {
-            const nextTaskName = $("#predictor-nextac-select option:selected").val();
-            const nextPoint = model.tasks.filter(x => x.assignment === nextTaskName)[0].point;
+            $("#predictor-nextac-warning").alert("close");
+
+            const myTaskResults = contest.standings.StandingsData.filter(x => x.UserScreenName === userScreenName)[0].TaskResults;
+            const myACTaskScreenNames = Object.keys(myTaskResults).filter(taskScreenName => myTaskResults[taskScreenName].Status === 1);
+            const myACTaskAssignments = myACTaskScreenNames.map(taskScreenName => {
+                return model.tasks.filter(task => task.taskScreenName === taskScreenName)[0].assignment;
+            });
+
+            const nextTaskAssignment = $("#predictor-nextac-select option:selected").val();
+            if (myACTaskAssignments.includes(nextTaskAssignment)) {
+                const alertDom = `<div class="alert alert-warning col-xs-7" role="alert" id="predictor-nextac-warning" style="float: right; padding: 5.5px 12px; margin-bottom: 0px;"><button type="button" class="close" data-dismiss="alert" aria-label="閉じる"><span aria-hidden="true">×</span></button><span>この問題はAC済です</span></div>`;
+                $("#predictor-current").after(alertDom);
+                return;
+            }
+
+            const nextPoint = model.tasks.filter(x => x.assignment === nextTaskAssignment)[0].point;
             const myTotalScore = contest.templateResults[userScreenName].TotalScore;
             const myPenalty = contest.templateResults[userScreenName].Penalty;
             // This is bugged, waiting for the update of "atcoder-userscript-libs".
