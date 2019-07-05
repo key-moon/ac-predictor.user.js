@@ -8,6 +8,7 @@ export class PredictorModel {
         this.history = model.history;
         this.updateInformation(model.information);
         this.updateData(model.rankValue, model.perfValue, model.rateValue);
+        this.updateTasks(model.tasks);
     }
 
     /**
@@ -33,5 +34,9 @@ export class PredictorModel {
         this.rankValue = rankValue;
         this.perfValue = perfValue;
         this.rateValue = rateValue;
+    }
+
+    updateTasks(tasks) {
+        this.tasks = tasks;
     }
 }

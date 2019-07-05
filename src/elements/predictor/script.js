@@ -109,6 +109,59 @@ async function afterAppend() {
             );
             updateView();
         });
+        $("#predictor-nextac-button").click(async function() {
+            const nextTaskName = $("#predictor-nextac-select option:selected").val();
+            const nextPoint = model.tasks.filter(x => x.assignment === nextTaskName)[0].point;
+            const myTotalScore = contest.templateResults[userScreenName].TotalScore;
+            const myPenalty = contest.templateResults[userScreenName].Penalty;
+            // This is bugged, waiting for the update of "atcoder-userscript-libs".
+            // const contestPenalty = contestInformation.Penalty;
+            const contestPenalty = await fetchContestPenalty(contestScreenName);
+            const nextElapsed = moment().diff(moment(startTime)) * 1000000;
+            const nextRank = getInsertedRatedRank(myTotalScore + nextPoint, nextElapsed + contestPenalty * myPenalty);
+            model = new CalcFromRankModel(model);
+            model.updateData(
+                nextRank,
+                model.perfValue,
+                model.rateValue
+            );
+            updateView();
+
+            function getInsertedRatedRank(totalScore, elapsed) {
+                let ratedRank = 1;
+                const resultsDic = results instanceof FixedResults ? results.resultsDic : results.templateResults;
+                const resultsArray = Object.values(resultsDic);
+                for (const result of resultsArray) {
+                    if ((result.TotalScore === totalScore && result.Elapsed >= elapsed) || (result.TotalScore < totalScore)) {
+                        return ratedRank;
+                    }
+                    if (result.IsRated) ratedRank++;
+                }
+            }
+            async function fetchContestPenalty(contestScreenName) {
+                return new Promise(async (resolve) => {
+                    const topPageDom = await $.ajax(`https://atcoder.jp/contests/${contestScreenName}`).then(x => new DOMParser().parseFromString(x, "text/html"));
+                    const dataParagraph = topPageDom.getElementsByClassName("small")[0];
+                    const data = Array.from(dataParagraph.children).map(x => x.innerText.split(':')[1].trim());
+                    resolve(parseDurationString(data[2]));
+    
+                    function parseDurationString(s) {
+                        if (s === "None" || s === "なし") return 0;
+                        if (!/(\d+[^\d]+)/.test(s)) return NaN;
+                        const dic = {ヶ月: "month", 日: "day", 時間: "hour", 分: "minute", 秒: "second"};
+                        let res = {};
+                        s.match(/(\d+[^\d]+)/g).forEach(x => {
+                            const trimmed = x.trim(' ','s');
+                            const num = trimmed.match(/\d+/)[0];
+                            const unit = trimmed.match(/[^\d]+/)[0];
+                            const convertedUnit = dic[unit]||unit;
+                            res[convertedUnit] = num;
+                        });
+                        return moment.duration(res).asMilliseconds();
+                    }
+                });
+            }
+        });
         $("#predictor-input-rank").keyup(function() {
             const inputString = $("#predictor-input-rank").val();
             if (!isFinite(inputString)) return;
@@ -166,7 +219,7 @@ async function afterAppend() {
 
         try {
             const tasks = await getContestTaskData(contestScreenName);
-            model.tasks = tasks;
+            model.updateTasks(tasks);
             for (const task of tasks) {
                 $("#predictor-nextac-select").append(`<option value="${task.assignment}">${task.assignment}問題</option>`)
             }
