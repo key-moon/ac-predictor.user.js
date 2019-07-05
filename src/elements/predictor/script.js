@@ -114,7 +114,10 @@ async function afterAppend() {
         $("#predictor-nextac-button").click(async function() {
             $("#predictor-nextac-warning").alert("close");
 
-            const myTaskResults = contest.standings.StandingsData.filter(x => x.UserScreenName === userScreenName)[0].TaskResults;
+            const myData = contest.standings.StandingsData.filter(x => x.UserScreenName === userScreenName)[0];
+            if (!myData) return;
+
+            const myTaskResults = myData.TaskResults;
             const myACTaskScreenNames = Object.keys(myTaskResults).filter(taskScreenName => myTaskResults[taskScreenName].Status === 1);
             const myACTaskAssignments = myACTaskScreenNames.map(taskScreenName => {
                 return model.tasks.filter(task => task.taskScreenName === taskScreenName)[0].assignment;
