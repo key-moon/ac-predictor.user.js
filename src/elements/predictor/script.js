@@ -148,7 +148,7 @@ async function afterAppend() {
 
             function getInsertedRatedRank(totalScore, elapsed) {
                 let ratedRank = 1;
-                const resultsDic = results instanceof FixedResults ? results.resultsDic : results.templateResults;
+                const resultsDic = results instanceof FixedResults ? results.resultsDic : results.TemplateResults;
                 const resultsArray = Object.values(resultsDic);
                 for (const result of resultsArray) {
                     if ((result.TotalScore === totalScore && result.Elapsed >= elapsed) || (result.TotalScore < totalScore)) {
