@@ -131,8 +131,8 @@ async function afterAppend() {
             }
 
             const nextPoint = model.tasks.filter(x => x.assignment === nextTaskAssignment)[0].point;
-            const myTotalScore = contest.templateResults[userScreenName].TotalScore;
-            const myPenalty = contest.templateResults[userScreenName].Penalty;
+            const myTotalScore = results.getUserResult(userScreenName).TotalScore;
+            const myPenalty = results.getUserResult(userScreenName).Penalty;
             const contestPenalty = contestInformation.Penalty * 1000000;
             const nextElapsed = moment().diff(moment(startTime)) * 1000000;
             const nextRank = getInsertedRatedRank(myTotalScore + nextPoint, nextElapsed + contestPenalty * myPenalty);
