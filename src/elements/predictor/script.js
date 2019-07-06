@@ -117,25 +117,27 @@ async function afterAppend() {
             const myData = contest.standings.StandingsData.filter(x => x.UserScreenName === userScreenName)[0];
             if (!myData) return;
 
-            const myTaskResults = myData.TaskResults;
-            const myACTaskScreenNames = Object.keys(myTaskResults).filter(taskScreenName => myTaskResults[taskScreenName].Status === 1);
-            const myACTaskAssignments = myACTaskScreenNames.map(taskScreenName => {
+            const currentTaskResults = myData.TaskResults;
+            const currentACTaskScreenNames = Object.keys(currentTaskResults).filter(taskScreenName => currentTaskResults[taskScreenName].Status === 1);
+            const currentACTaskAssignments = currentACTaskScreenNames.map(taskScreenName => {
                 return model.tasks.find(task => task.taskScreenName === taskScreenName).assignment;
             });
 
             const nextTaskAssignment = $("#predictor-nextac-select option:selected").val();
-            if (myACTaskAssignments.includes(nextTaskAssignment)) {
+            const nextTaskScreenName = model.tasks.find(task => task.assignment === nextTaskAssignment).taskScreenName;
+            if (currentACTaskAssignments.includes(nextTaskAssignment)) {
                 const alertDom = `<div class="alert alert-warning col-xs-7" role="alert" id="predictor-nextac-warning" style="float: right; padding: 5.5px 12px; margin-bottom: 0px;"><button type="button" class="close" data-dismiss="alert" aria-label="閉じる"><span aria-hidden="true">×</span></button><span>この問題はAC済です</span></div>`;
                 $("#predictor-current").after(alertDom);
                 return;
             }
 
-            const nextPoint = model.tasks.filter(x => x.assignment === nextTaskAssignment)[0].point;
-            const myTotalScore = results.getUserResult(userScreenName).TotalScore;
-            const myPenalty = results.getUserResult(userScreenName).Penalty;
+            const nextPoint = model.tasks.find(x => x.assignment === nextTaskAssignment).point;
+            const currentTotalScore = results.getUserResult(userScreenName).TotalScore;
+            const currentPenalty = results.getUserResult(userScreenName).Penalty;
+            const nextPenalty = currentTaskResults[nextTaskScreenName] ? currentTaskResults[nextTaskScreenName].Failure : 0;
             const contestPenalty = contestInformation.Penalty * 1000000;
             const nextElapsed = moment().diff(moment(startTime)) * 1000000;
-            const nextRank = results.getInsertedRatedRank(myTotalScore + nextPoint, nextElapsed + contestPenalty * myPenalty);
+            const nextRank = results.getInsertedRatedRank(currentTotalScore + nextPoint, nextElapsed + contestPenalty * (currentPenalty * nextPenalty));
             model = new CalcFromRankModel(model);
             model.updateData(
                 nextRank,
