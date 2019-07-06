@@ -19,7 +19,7 @@ export class Contest {
         this.templateResults = analyzedData.templateResults;
         this.IsRated = analyzedData.isRated;
 
-        /** @return {{contestantAPerf: number[], templateResults: Object<string, Result>, isRated: boolean}} */
+        /** @return {{contestantAPerf: number[], templateResults: Map<string, Result>, isRated: boolean}} */
         function analyzeStandingsData(
             fixed,
             standingsData,
@@ -41,10 +41,10 @@ export class Contest {
             }
             return analyzedData;
 
-            /** @return {{contestantAPerf: number[], templateResults: Object.<string, Result>}}*/
+            /** @return {{contestantAPerf: number[], templateResults: Map<string, Result>}}*/
             function analyze(isUserRated) {
                 let contestantAPerf = [];
-                let templateResults = {};
+                let templateResults = new Map();
 
                 let currentRatedRank = 1;
 
@@ -65,7 +65,7 @@ export class Contest {
                         currentRatedRank +
                         Math.max(0, ratedInTiedUsers - 1) / 2;
                     tiedUsers.forEach(data => {
-                        templateResults[data.UserScreenName] = new Result(
+                        templateResults.set(data.UserScreenName, new Result(
                             isUserRated(data),
                             data.TotalResult.Count !== 0,
                             data.UserScreenName,
@@ -79,7 +79,7 @@ export class Contest {
                             data.TotalResult.Score,
                             data.TotalResult.Elapsed,
                             data.TotalResult.Penalty
-                        );
+                        ));
                     });
                     currentRatedRank += ratedInTiedUsers;
                     tiedUsers.length = 0;

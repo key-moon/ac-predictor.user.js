@@ -101,7 +101,7 @@ async function afterAppend() {
             updateView();
         });
         $("#predictor-current").click(function() {
-            const myResult = contest.templateResults[userScreenName];
+            const myResult = contest.templateResults.get(userScreenName);
             if (!myResult) return;
             model = new CalcFromRankModel(model);
             model.updateData(
