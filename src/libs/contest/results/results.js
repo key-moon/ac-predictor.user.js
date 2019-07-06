@@ -5,4 +5,10 @@ export class Results {
      * @return {Result}
      */
     getUserResult(userScreenName) {}
+    /**
+     * @param {number} totalScore
+     * @param {number} elapsed
+     * @return {number}
+     */
+    getInsertedRatedRank(totalScore, elapsed) {}
 }

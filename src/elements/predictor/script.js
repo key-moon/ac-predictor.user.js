@@ -135,7 +135,7 @@ async function afterAppend() {
             const myPenalty = results.getUserResult(userScreenName).Penalty;
             const contestPenalty = contestInformation.Penalty * 1000000;
             const nextElapsed = moment().diff(moment(startTime)) * 1000000;
-            const nextRank = getInsertedRatedRank(myTotalScore + nextPoint, nextElapsed + contestPenalty * myPenalty);
+            const nextRank = results.getInsertedRatedRank(myTotalScore + nextPoint, nextElapsed + contestPenalty * myPenalty);
             model = new CalcFromRankModel(model);
             model.updateData(
                 nextRank,
@@ -143,18 +143,6 @@ async function afterAppend() {
                 model.rateValue
             );
             updateView();
-
-            function getInsertedRatedRank(totalScore, elapsed) {
-                let ratedRank = 1;
-                const resultsDic = results instanceof FixedResults ? results.resultsDic : results.TemplateResults;
-                const resultsArray = Object.values(resultsDic);
-                for (const result of resultsArray) {
-                    if ((result.TotalScore === totalScore && result.Elapsed >= elapsed) || (result.TotalScore < totalScore)) {
-                        return ratedRank;
-                    }
-                    if (result.IsRated) ratedRank++;
-                }
-            }
         });
         $("#predictor-input-rank").keyup(function() {
             const inputString = $("#predictor-input-rank").val();
