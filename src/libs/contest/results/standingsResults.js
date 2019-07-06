@@ -48,13 +48,11 @@ export class OnDemandResults extends Results {
      * @return {number}
      */
     getInsertedRatedRank(totalScore, elapsed) {
-        let ratedRank = 1;
         const resultsArray = Object.values(this.TemplateResults);
         for (const result of resultsArray) {
             if ((result.TotalScore === totalScore && result.Elapsed >= elapsed) || (result.TotalScore < totalScore)) {
-                return ratedRank;
+                return result.RatedRank;
             }
-            if (result.IsRated) ratedRank++;
         }
     }
 }
