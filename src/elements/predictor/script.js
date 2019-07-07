@@ -137,7 +137,8 @@ async function afterAppend() {
             const nextPenalty = currentTaskResults[nextTaskScreenName] ? currentTaskResults[nextTaskScreenName].Failure : 0;
             const contestPenalty = contestInformation.Penalty * 1000000;
             const nextElapsed = moment().diff(moment(startTime)) * 1000000;
-            const nextRank = results.getInsertedRatedRank(currentTotalScore + nextPoint, nextElapsed + contestPenalty * (currentPenalty * nextPenalty));
+            const penaltyTime = contestPenalty * (currentPenalty + nextPenalty)
+            const nextRank = results.getInsertedRatedRank(currentTotalScore + nextPoint, nextElapsed + penaltyTime);
             model = new CalcFromRankModel(model);
             model.updateData(
                 nextRank,
