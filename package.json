@@ -5,7 +5,7 @@
   "main": "ac-predictor/main.js",
   "dependencies": {
     "atcoder-sidemenu": "^0.1.3",
-    "atcoder-userscript-libs": "^0.1.3",
+    "atcoder-userscript-libs": "^0.1.4",
     "jquery": "^3.4.1",
     "moment": "^2.24.0"
   },

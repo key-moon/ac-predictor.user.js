@@ -20,7 +20,7 @@ export class OnDemandResults extends Results {
      * @return {Result}
      */
     getUserResult(userScreenName) {
-        const baseResults = this.TemplateResults[userScreenName];
+        const baseResults = this.TemplateResults.get(userScreenName);
         if (!baseResults) return null;
         if (!baseResults.Performance) {
             baseResults.InnerPerformance = this.Contest.getInnerPerf(
@@ -41,5 +41,18 @@ export class OnDemandResults extends Results {
             );
         }
         return baseResults;
+    }
+    /**
+     * @param {number} totalScore
+     * @param {number} elapsed
+     * @return {number}
+     */
+    getInsertedRatedRank(totalScore, elapsed) {
+        const resultsIterator = this.TemplateResults.values();
+        for (const result of resultsIterator) {
+            if ((result.TotalScore === totalScore && result.Elapsed >= elapsed) || (result.TotalScore < totalScore)) {
+                return result.RatedRank;
+            }
+        }
     }
 }

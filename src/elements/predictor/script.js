@@ -4,6 +4,7 @@ import moment from "moment";
 import { SideMenuElement } from "atcoder-sidemenu";
 import { PredictorDB } from "../../libs/database/predictorDB";
 import { Contest } from "../../libs/contest/contest";
+import { Task } from "../../libs/contest/task";
 import { OnDemandResults } from "../../libs/contest/results/standingsResults";
 import { FixedResults } from "../../libs/contest/results/fIxedResults";
 import { Result } from "../../libs/contest/results/result";
@@ -43,6 +44,9 @@ const predictorElements = [
     "predictor-input-perf",
     "predictor-input-rate",
     "predictor-current",
+    "predictor-nextac-select",
+    "predictor-nextac-button",
+    "predictor-nextac-warning",
     "predictor-reload",
     "predictor-tweet"
 ];
@@ -97,11 +101,47 @@ async function afterAppend() {
             updateView();
         });
         $("#predictor-current").click(function() {
-            const myResult = contest.templateResults[userScreenName];
+            const myResult = contest.templateResults.get(userScreenName);
             if (!myResult) return;
             model = new CalcFromRankModel(model);
             model.updateData(
                 myResult.RatedRank,
+                model.perfValue,
+                model.rateValue
+            );
+            updateView();
+        });
+        $("#predictor-nextac-button").click(async function() {
+            $("#predictor-nextac-warning").alert("close");
+
+            const myData = contest.standings.StandingsData.filter(x => x.UserScreenName === userScreenName)[0];
+            if (!myData) return;
+
+            const currentTaskResults = myData.TaskResults;
+            const currentACTaskScreenNames = Object.keys(currentTaskResults).filter(taskScreenName => currentTaskResults[taskScreenName].Status === 1);
+            const currentACTaskAssignments = currentACTaskScreenNames.map(taskScreenName => {
+                return model.tasks.find(task => task.taskScreenName === taskScreenName).assignment;
+            });
+
+            const nextTaskAssignment = $("#predictor-nextac-select option:selected").val();
+            const nextTaskScreenName = model.tasks.find(task => task.assignment === nextTaskAssignment).taskScreenName;
+            if (currentACTaskAssignments.includes(nextTaskAssignment)) {
+                const alertDom = `<div class="alert alert-warning col-xs-7" role="alert" id="predictor-nextac-warning" style="float: right; padding: 5.5px 12px; margin-bottom: 0px;"><button type="button" class="close" data-dismiss="alert" aria-label="閉じる"><span aria-hidden="true">×</span></button><span>この問題はAC済です</span></div>`;
+                $("#predictor-current").after(alertDom);
+                return;
+            }
+
+            const nextPoint = model.tasks.find(x => x.assignment === nextTaskAssignment).point;
+            const currentTotalScore = results.getUserResult(userScreenName).TotalScore;
+            const currentPenalty = results.getUserResult(userScreenName).Penalty;
+            const nextPenalty = currentTaskResults[nextTaskScreenName] ? currentTaskResults[nextTaskScreenName].Failure : 0;
+            const contestPenalty = contestInformation.Penalty * 1000000;
+            const nextElapsed = moment().diff(moment(startTime)) * 1000000;
+            const penaltyTime = contestPenalty * (currentPenalty + nextPenalty)
+            const nextRank = results.getInsertedRatedRank(currentTotalScore + nextPoint, nextElapsed + penaltyTime);
+            model = new CalcFromRankModel(model);
+            model.updateData(
+                nextRank,
                 model.perfValue,
                 model.rateValue
             );
@@ -160,6 +200,36 @@ async function afterAppend() {
         }
         async function getAPerfsFromLocalData() {
             return await predictorDB.getData("APerfs", contestScreenName);
+        }
+
+        try {
+            const tasks = await getContestTasks(contestScreenName);
+            model.updateTasks(tasks);
+            for (const task of tasks) {
+                $("#predictor-nextac-select").append(`<option value="${task.assignment}">${task.assignment}問題</option>`)
+            }
+        } catch (e) {
+            throw new Error("配点の取得に失敗しました。");
+        }
+
+        async function getContestTasks(contestScreenName) {
+            const standingsTaskInfo = standings.TaskInfo;
+            let tasks = [];
+            for (const taskData of standingsTaskInfo) {
+                tasks.push(new Task(
+                    taskData.Assignment,
+                    (await getTaskPoint(taskData.TaskScreenName)),
+                    taskData.TaskScreenName
+                ))
+            }
+            return tasks;
+
+            async function getTaskPoint(taskScreenName) {
+                const taskPageDom = await $.ajax(`https://atcoder.jp/contests/${contestScreenName}/tasks/${taskScreenName}`).then(x => new DOMParser().parseFromString(x, "text/html"));
+                const point = parseInt($(taskPageDom).find("#task-statement").find("var").eq(0).text());
+                if (!isNaN(point)) return point * 100;
+                else throw new Error();
+            }
         }
 
         await updateData(aPerfs, standings);
@@ -325,7 +395,10 @@ async function afterAppend() {
                         result && result.IsRated
                             ? (lastPerformance = result.Performance)
                             : lastPerformance,
-                        result ? result.InnerPerformance : 0
+                        result ? result.InnerPerformance : 0,
+                        data.TotalResult.Score,
+                        data.TotalResult.Elapsed,
+                        data.TotalResult.Penalty
                     );
                 })
             );

@@ -6,9 +6,9 @@ export class FixedResults extends Results {
      */
     constructor(results) {
         super();
-        this.resultsDic = {};
+        this.resultsDic = new Map();
         results.forEach(result => {
-            this.resultsDic[result.UserScreenName] = result;
+            this.resultsDic.set(result.UserScreenName, result);
         });
     }
     /**
@@ -16,6 +16,21 @@ export class FixedResults extends Results {
      * @return {Result}
      */
     getUserResult(userScreenName) {
-        return this.resultsDic[userScreenName] || null;
+        return this.resultsDic.get(userScreenName) || null;
+    }
+    /**
+     * @param {number} totalScore
+     * @param {number} elapsed
+     * @return {number}
+     */
+    getInsertedRatedRank(totalScore, elapsed) {
+        let ratedRank = 1;
+        const resultsIterator = this.resultsDic.values();
+        for (const result of resultsIterator) {
+            if ((result.TotalScore === totalScore && result.Elapsed >= elapsed) || (result.TotalScore < totalScore)) {
+                return ratedRank;
+            }
+            if (result.IsRated) ratedRank++;
+        }
     }
 }

@@ -17,9 +17,16 @@
     </div>
 </div>
 <div class="row">
-    <div class="btn-group">
         <button class="btn btn-default" id="predictor-current">現在の順位</button>
-        <button type="button" class="btn btn-primary" id="predictor-reload" data-loading-text="更新中…">更新</button>
-        <!--<button class="btn btn-default" id="predictor-solved" disabled>現問題AC後</button>-->
+</div>
+<div class="row">
+    <div class="input-group col-xs-10">
+        <select class="form-control" id="predictor-nextac-select"></select>            
+        <div class="input-group-btn">
+            <button class="btn btn-default" id="predictor-nextac-button">をACした場合の順位</button>
+        </div>
     </div>
+</div>
+<div class="row">
+    <button type="button" class="btn btn-primary" id="predictor-reload" data-loading-text="更新中…">更新</button>
 </div>
