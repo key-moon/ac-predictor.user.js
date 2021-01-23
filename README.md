@@ -1,3 +1,5 @@
+このリポジトリは [ac-predictor](https://github.com/key-moon/ac-predictor) に統合されました。
+
 # 概要
 ac-predictorのUserScript([ac-predictor](https://greasyfork.org/ja/scripts/369954-ac-predictor))の開発環境です。
 
