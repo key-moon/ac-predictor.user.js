@@ -1,5 +1,7 @@
 このリポジトリは [ac-predictor](https://github.com/key-moon/ac-predictor) に統合されました。
 
+<details><summary>旧 README.md</summary>
+
 # 概要
 ac-predictorのUserScript([ac-predictor](https://greasyfork.org/ja/scripts/369954-ac-predictor))の開発環境です。
 
@@ -43,3 +45,4 @@ ac-predictorのUserScript([ac-predictor](https://greasyfork.org/ja/scripts/36995
 
 # 謝辞
 リポジトリ移行前に送られたため、現在ここでは見られないプルリクです([ツイート画面が2つ出てくる現象を修正](https://github.com/key-moon/ac-predictor/pull/1))。miozuneさん、ありがとうございます!
+</details>
